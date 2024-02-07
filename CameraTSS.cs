@@ -11,6 +11,7 @@ using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.Game.World;
 using Sandbox.ModAPI;
 using SharpDX.DXGI;
+using VRage.Game.GUI.TextPanel;
 using VRage.Game.ModAPI;
 using VRage.Game.Utils;
 using VRage.ModAPI;
@@ -38,6 +39,7 @@ namespace avaness.CameraLCD
         private bool registered, functional;
         private byte[] buffer = new byte[0];
         private int bufferOffset = 0;
+        private ContentType contentType;
 
         static CameraTSS()
         {
@@ -52,6 +54,7 @@ namespace avaness.CameraLCD
             terminalBlock.OnMarkForClose += BlockMarkedForClose;
             terminalBlock.CustomDataChanged += CustomDataChanged;
             terminalBlock.IsWorkingChanged += IsWorkingChanged;
+            terminalBlock.PropertiesChanged += PropertiesChanged;
             CustomDataChanged(terminalBlock);
         }
 
@@ -61,7 +64,13 @@ namespace avaness.CameraLCD
             terminalBlock.OnMarkForClose -= BlockMarkedForClose;
             terminalBlock.CustomDataChanged -= CustomDataChanged;
             terminalBlock.IsWorkingChanged -= IsWorkingChanged;
+            terminalBlock.PropertiesChanged -= PropertiesChanged;
             Unregister();
+        }
+
+        private void PropertiesChanged(MyTerminalBlock obj)
+        {
+            contentType = panelComponent.ContentType;
         }
 
         void BlockMarkedForClose(IMyEntity ent)
@@ -165,7 +174,7 @@ namespace avaness.CameraLCD
         /// </summary>
         public bool OnDrawScene()
         {
-            if (!TryGetTextureName(out string screenName) || camera == null || !functional)
+            if (!TryGetTextureName(out string screenName) || camera == null || !functional || contentType != ContentType.SCRIPT)
                 return false;
 
             if (panel != null)
